@@ -89,7 +89,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Add Product */}
         <Link 
-          to="/admin/products/new"
+          to="/admin/products/ProductForm"
           className="bg-[#111625] border border-gray-800/60 hover:border-gray-700 rounded-2xl p-4 flex items-center gap-4 transition-all group"
         >
           <div className="w-12 h-12 rounded-xl bg-red-600 flex items-center justify-center text-white shrink-0 group-hover:scale-105 transition-transform">

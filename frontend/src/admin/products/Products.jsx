@@ -87,7 +87,7 @@ export default function Products() {
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-400">{products.length} total products</p>
         <Link
-          to="/admin/products/new"
+          to="/admin/products/ProductForm"
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm text-white transition-all hover:opacity-90 shadow-lg"
           style={{ background: '#FF2027' }}
         >

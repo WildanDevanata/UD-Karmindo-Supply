@@ -58,7 +58,7 @@ function Navbar({ onNav }) {
         <div className="flex items-center justify-between h-16">
           <button onClick={() => handleNav('home')} className="flex items-center gap-3 shrink-0">
             <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-md p-1">
-              <img src="/logo-ref.png" alt="UKS Logo" className="w-full h-full object-contain" />
+              <img src="/logo.png" alt="UKS Logo" className="w-full h-full object-contain" />
             </div>
             <div className="text-white text-left">
               <div className="font-display font-800 text-base leading-tight tracking-tight">UD. Karmindo Supply</div>
@@ -611,7 +611,7 @@ function Footer({ categories, onNav }) {
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow p-1.5">
-                <img src="/logo-ref.png" alt="UKS Logo" className="w-full h-full object-contain" />
+                <img src="/logo.png" alt="UKS Logo" className="w-full h-full object-contain" />
               </div>
               <div>
                 <div className="font-display font-black text-lg leading-tight">UD. Karmindo Supply</div>

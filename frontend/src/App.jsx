@@ -7,6 +7,7 @@ import Products from './admin/products/Products';
 import Categories from './admin/categories/categories';
 import Media from './admin/media/media';
 import Settings from './admin/settings/settings';
+import ProductForm from './admin/products/ProductForm/ProductForm';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
         
         {/* Kamu bisa tambah halaman admin lain di sini nanti: */}
         <Route path="products" element={<Products />} />
+        <Route path="products/ProductForm" element={<ProductForm />} />
         <Route path="categories" element={<Categories />} />
         <Route path="media" element={<Media />} />
         <Route path="settings" element={<Settings />} />

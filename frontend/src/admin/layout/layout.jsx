@@ -85,7 +85,7 @@ export default function AdminLayout() {
       >
         <div className="flex items-center gap-3 px-5 py-5 border-b border-gray-800">
           <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center p-1 shrink-0">
-            <img src="/logo-ref.png" alt="UKS" className="w-full h-full object-contain" />
+            <img src="/logo.png" alt="UKS" className="w-full h-full object-contain" />
           </div>
           <div>
             <div className="font-display font-700 text-sm leading-tight">UD. Karmindo</div>
