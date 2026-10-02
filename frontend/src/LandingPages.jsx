@@ -668,6 +668,7 @@ function FloatingWA() {
 }
 
 // ─── Public Site Root ─────────────────────────────────────────────────────────
+// ─── Public Site Root ─────────────────────────────────────────────────────────
 export default function PublicSite() {
   const [activeProduct, setActiveProduct] = useState(null);
   const [navCategory, setNavCategory] = useState(null);
@@ -686,8 +687,18 @@ export default function PublicSite() {
           axios.get(`${API_BASE_URL}/categories`),
           axios.get(`${API_BASE_URL}/products`),
         ]);
-        setCategories(catRes.data);
-        setProducts(prodRes.data);
+
+        // Pengecekan aman untuk menangani array langsung maupun response wrapper { data: [...] }
+        const categoriesData = Array.isArray(catRes.data) 
+          ? catRes.data 
+          : (catRes.data?.data || []);
+
+        const productsData = Array.isArray(prodRes.data) 
+          ? prodRes.data 
+          : (prodRes.data?.data || []);
+
+        setCategories(categoriesData);
+        setProducts(productsData);
       } catch (err) {
         console.error('Error fetching data from API:', err);
         setError('Gagal mengambil data dari server Express.');
@@ -698,6 +709,7 @@ export default function PublicSite() {
 
     fetchData();
   }, []);
+
 
   const handleNav = (id) => {
     const categoryIds = categories.map(c => c.id);

@@ -7,26 +7,46 @@ export default function Products() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [confirmDelete, setConfirmDelete] = useState(null);
+
+  // State untuk Edit Modal & Form Data
+  const [editProduct, setEditProduct] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    shortDescription: '',
+    description: '',
+    categoryId: '',
+    status: 'published',
+    imageUrl: '',
+    price: ''
+  });
 
   // Fetch data produk & kategori
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
+      setError('');
       const [resProducts, resCategories] = await Promise.all([
         fetch(`${API_BASE_URL}/products`),
         fetch(`${API_BASE_URL}/categories`),
       ]);
+
+      if (!resProducts.ok || !resCategories.ok) {
+        throw new Error('Gagal mengambil data dari server.');
+      }
 
       const prodData = await resProducts.json();
       const catData = await resCategories.json();
 
       setProducts(Array.isArray(prodData) ? prodData : []);
       setCategories(Array.isArray(catData) ? catData : []);
-    } catch (error) {
-      console.error('Error fetching data:', error);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setError('Koneksi ke server gagal. Pastikan backend di port 5000 sudah berjalan.');
     } finally {
       setLoading(false);
     }
@@ -35,6 +55,54 @@ export default function Products() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Buka Modal Edit & isi form awal dengan data produk terpilih
+  const handleOpenEdit = (p) => {
+    setEditProduct(p);
+    setEditFormData({
+      name: p.name || '',
+      shortDescription: p.shortDescription || '',
+      description: p.description || '',
+      categoryId: p.categoryId || p.category || '',
+      status: p.status || 'published',
+      imageUrl: p.imageUrl || p.image || '',
+      price: p.price || ''
+    });
+  };
+
+  // Batal / Tutup Modal Edit
+  const handleCloseEdit = () => {
+    setEditProduct(null);
+  };
+
+  // Submit Perubahan Edit via PUT / PATCH
+  const handleUpdateSubmit = async (e) => {
+    e.preventDefault();
+    if (!editProduct) return;
+
+    try {
+      setIsSubmitting(true);
+      const res = await fetch(`${API_BASE_URL}/products/${editProduct.id}`, {
+        method: 'PUT', // Sesuaikan method backend (PUT / PATCH)
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editFormData),
+      });
+
+      if (res.ok) {
+        setEditProduct(null);
+        fetchData();
+      } else {
+        alert('Gagal mengupdate produk');
+      }
+    } catch (err) {
+      console.error('Error updating product:', err);
+      alert('Terjadi kesalahan saat mengupdate produk.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Hapus Produk via API DELETE
   const handleDelete = async (id) => {
@@ -46,8 +114,8 @@ export default function Products() {
         setConfirmDelete(null);
         fetchData();
       }
-    } catch (error) {
-      console.error('Error deleting product:', error);
+    } catch (err) {
+      console.error('Error deleting product:', err);
     }
   };
 
@@ -65,8 +133,8 @@ export default function Products() {
       if (res.ok) {
         fetchData();
       }
-    } catch (error) {
-      console.error('Error updating product status:', error);
+    } catch (err) {
+      console.error('Error updating product status:', err);
     }
   };
 
@@ -77,13 +145,13 @@ export default function Products() {
       ? (p.shortDescription || p.description).toLowerCase().includes(search.toLowerCase())
       : false;
     const matchSearch = !search || nameMatch || descMatch;
-    const matchStatus = filterStatus === 'all' || p.status?.toLowerCase() === filterStatus.toLowerCase();
+    const matchStatus = filterStatus === 'all' || (p.status || 'published').toLowerCase() === filterStatus.toLowerCase();
     return matchSearch && matchStatus;
   });
 
   return (
     <div className="space-y-6">
-      {/* Counter & Add Product Header */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-400">{products.length} total products</p>
         <Link
@@ -97,6 +165,12 @@ export default function Products() {
           Add Product
         </Link>
       </div>
+
+      {error && (
+        <div className="p-4 rounded-xl bg-red-950/80 border border-red-800/60 text-red-300 text-xs font-medium">
+          {error}
+        </div>
+      )}
 
       {/* Search & Filter Bar */}
       <div className="bg-[#111827] rounded-2xl border border-gray-800/80 p-3 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
@@ -159,7 +233,7 @@ export default function Products() {
                 </tr>
               ) : (
                 filtered.map((p) => {
-                  const cat = categories.find((c) => c.id === p.categoryId || c.slug === p.category);
+                  const cat = categories.find((c) => c.id === p.categoryId || c.id === p.category);
                   const updatedAt = p.updatedAt ? new Date(p.updatedAt) : new Date();
                   const date = updatedAt.toLocaleDateString('en-GB', {
                     day: '2-digit',
@@ -169,12 +243,11 @@ export default function Products() {
 
                   return (
                     <tr key={p.id} className="hover:bg-[#131d31] transition-colors">
-                      {/* Product */}
                       <td className="py-3.5 px-5">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-800 border border-gray-700/60 shrink-0">
                             <img
-                              src={p.imageUrl || p.image}
+                              src={p.imageUrl || p.image || 'https://via.placeholder.com/150'}
                               alt={p.name}
                               className="w-full h-full object-cover"
                               loading="lazy"
@@ -191,12 +264,10 @@ export default function Products() {
                         </div>
                       </td>
 
-                      {/* Category */}
                       <td className="py-3.5 px-5 text-gray-300 font-medium">
                         {cat?.name || p.category || p.categoryId || '-'}
                       </td>
 
-                      {/* Status */}
                       <td className="py-3.5 px-5">
                         <button
                           onClick={() => toggleStatus(p.id, p.status || 'published')}
@@ -205,26 +276,24 @@ export default function Products() {
                               ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-800/50'
                               : 'bg-amber-950/80 text-amber-400 border border-amber-800/50'
                           }`}
-                          title="Click to toggle status"
                         >
                           {p.status || 'PUBLISHED'}
                         </button>
                       </td>
 
-                      {/* Updated Date */}
                       <td className="py-3.5 px-5 text-gray-400 text-[11px]">
                         {date}
                       </td>
 
-                      {/* Actions */}
                       <td className="py-3.5 px-5 text-right">
                         <div className="inline-flex items-center justify-end gap-2">
-                          <Link
-                            to={`/admin/products/${p.id}/edit`}
+                          {/* Tombol Edit memicu Modal */}
+                          <button
+                            onClick={() => handleOpenEdit(p)}
                             className="px-3 py-1.5 bg-[#1e293b] hover:bg-gray-700 text-gray-200 font-semibold rounded-lg text-xs transition-colors"
                           >
                             Edit
-                          </Link>
+                          </button>
                           <button
                             onClick={() => setConfirmDelete(p.id)}
                             className="px-3 py-1.5 bg-red-950/50 hover:bg-red-900/80 text-red-400 font-semibold rounded-lg text-xs transition-colors"
@@ -244,11 +313,6 @@ export default function Products() {
                     {search || filterStatus !== 'all'
                       ? 'No products match your filters.'
                       : 'No products yet. '}
-                    {!search && filterStatus === 'all' && (
-                      <Link to="/admin/products/new" style={{ color: '#FF2027' }} className="underline">
-                        Add one
-                      </Link>
-                    )}
                   </td>
                 </tr>
               )}
@@ -256,6 +320,97 @@ export default function Products() {
           </table>
         </div>
       </div>
+
+      {/* MODAL EDIT PRODUCT */}
+      {editProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <div className="bg-[#111827] border border-gray-800 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl overflow-y-auto max-h-[90vh]">
+            <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+              <h3 className="font-bold text-white text-base">Edit Product</h3>
+              <button onClick={handleCloseEdit} className="text-gray-400 hover:text-white">✕</button>
+            </div>
+
+            <form onSubmit={handleUpdateSubmit} className="space-y-4 text-xs">
+              <div>
+                <label className="block text-gray-400 mb-1">Product Name</label>
+                <input
+                  type="text"
+                  required
+                  value={editFormData.name}
+                  onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                  className="w-full px-3 py-2 bg-[#1a2333] border border-gray-700 rounded-xl text-white focus:outline-none focus:border-red-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-gray-400 mb-1">Category</label>
+                  <select
+                    value={editFormData.categoryId}
+                    onChange={(e) => setEditFormData({ ...editFormData, categoryId: e.target.value })}
+                    className="w-full px-3 py-2 bg-[#1a2333] border border-gray-700 rounded-xl text-white focus:outline-none focus:border-red-500"
+                  >
+                    <option value="">Select Category</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-gray-400 mb-1">Status</label>
+                  <select
+                    value={editFormData.status}
+                    onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
+                    className="w-full px-3 py-2 bg-[#1a2333] border border-gray-700 rounded-xl text-white focus:outline-none focus:border-red-500"
+                  >
+                    <option value="published">Published</option>
+                    <option value="draft">Draft</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-gray-400 mb-1">Image URL</label>
+                <input
+                  type="text"
+                  value={editFormData.imageUrl}
+                  onChange={(e) => setEditFormData({ ...editFormData, imageUrl: e.target.value })}
+                  className="w-full px-3 py-2 bg-[#1a2333] border border-gray-700 rounded-xl text-white focus:outline-none focus:border-red-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-400 mb-1">Short Description</label>
+                <textarea
+                  rows={2}
+                  value={editFormData.shortDescription}
+                  onChange={(e) => setEditFormData({ ...editFormData, shortDescription: e.target.value })}
+                  className="w-full px-3 py-2 bg-[#1a2333] border border-gray-700 rounded-xl text-white focus:outline-none focus:border-red-500"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-3 border-t border-gray-800">
+                <button
+                  type="button"
+                  onClick={handleCloseEdit}
+                  className="flex-1 py-2.5 bg-gray-800 hover:bg-gray-700 rounded-xl text-gray-300 font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 py-2.5 rounded-xl text-white font-semibold shadow-md"
+                  style={{ background: '#FF2027' }}
+                >
+                  {isSubmitting ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Confirm Delete Modal */}
       {confirmDelete && (

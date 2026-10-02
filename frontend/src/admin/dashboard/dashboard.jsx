@@ -30,7 +30,22 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
-  // Hitung metric statistik secara dinamis
+  // Helper untuk memastikan URL Gambar Valid (Menangani relative path dari Backend Express)
+  const getImageUrl = (product) => {
+    const rawImage = product.image || product.imageUrl || product.images?.[0];
+
+    if (!rawImage) return 'https://via.placeholder.com/150?text=No+Image';
+    
+    // Jika sudah berupa URL lengkap (http/https/data:image)
+    if (rawImage.startsWith('http') || rawImage.startsWith('data:')) {
+      return rawImage;
+    }
+
+    // Jika berupa relative path dari server Express
+    const cleanPath = rawImage.startsWith('/') ? rawImage : `/${rawImage}`;
+    return `http://localhost:5000${cleanPath}`;
+  };
+
   const totalProducts = products.length;
   const totalCategories = categories.length;
   const publishedProducts = products.filter(p => p.status !== 'draft').length;
@@ -44,7 +59,6 @@ export default function Dashboard() {
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* 1. Stat Cards Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Products */}
         <div className="bg-[#111625] border border-gray-800/60 rounded-2xl p-5 relative overflow-hidden">
           <div className="flex justify-between items-start mb-4">
             <span className="text-2xl">📦</span>
@@ -54,7 +68,6 @@ export default function Dashboard() {
           <div className="text-xs text-gray-400">Total Products</div>
         </div>
 
-        {/* Total Categories */}
         <div className="bg-[#111625] border border-gray-800/60 rounded-2xl p-5 relative overflow-hidden">
           <div className="flex justify-between items-start mb-4">
             <span className="text-2xl">🏷️</span>
@@ -64,7 +77,6 @@ export default function Dashboard() {
           <div className="text-xs text-gray-400">Total Categories</div>
         </div>
 
-        {/* Published */}
         <div className="bg-[#111625] border border-gray-800/60 rounded-2xl p-5 relative overflow-hidden">
           <div className="flex justify-between items-start mb-4">
             <span className="text-2xl">✅</span>
@@ -74,7 +86,6 @@ export default function Dashboard() {
           <div className="text-xs text-gray-400">Published</div>
         </div>
 
-        {/* Draft */}
         <div className="bg-[#111625] border border-gray-800/60 rounded-2xl p-5 relative overflow-hidden">
           <div className="flex justify-between items-start mb-4">
             <span className="text-2xl">📝</span>
@@ -87,7 +98,6 @@ export default function Dashboard() {
 
       {/* 2. Quick Action Cards Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Add Product */}
         <Link 
           to="/admin/products/ProductForm"
           className="bg-[#111625] border border-gray-800/60 hover:border-gray-700 rounded-2xl p-4 flex items-center gap-4 transition-all group"
@@ -103,7 +113,6 @@ export default function Dashboard() {
           </div>
         </Link>
 
-        {/* Manage Categories */}
         <Link 
           to="/admin/categories"
           className="bg-[#111625] border border-gray-800/60 hover:border-gray-700 rounded-2xl p-4 flex items-center gap-4 transition-all group"
@@ -119,7 +128,6 @@ export default function Dashboard() {
           </div>
         </Link>
 
-        {/* Media Library */}
         <Link 
           to="/admin/media"
           className="bg-[#111625] border border-gray-800/60 hover:border-gray-700 rounded-2xl p-4 flex items-center gap-4 transition-all group"
@@ -136,7 +144,7 @@ export default function Dashboard() {
         </Link>
       </div>
 
-      {/* 3. Recent Products Table / Card Section */}
+      {/* 3. Recent Products Table */}
       <div className="bg-[#111625] border border-gray-800/60 rounded-2xl overflow-hidden">
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-800/60">
           <h2 className="font-semibold text-white text-base">Recent Products</h2>
@@ -148,22 +156,25 @@ export default function Dashboard() {
         <div className="divide-y divide-gray-800/40">
           {products.slice(0, 5).map((product) => (
             <div key={product.id} className="flex items-center justify-between px-6 py-4 hover:bg-gray-800/20 transition-colors">
-              {/* Product Info */}
               <div className="flex items-center gap-4">
                 <img 
-                  src={product.image} 
+                  src={getImageUrl(product)} 
                   alt={product.name} 
-                  className="w-11 h-11 rounded-xl object-cover bg-gray-800 shrink-0" 
+                  onError={(e) => {
+                    // Fallback jika image gagal load
+                    e.target.onerror = null;
+                    e.target.src = 'https://via.placeholder.com/150?text=No+Image';
+                  }}
+                  className="w-11 h-11 rounded-xl object-cover bg-gray-800 shrink-0 border border-gray-800" 
                 />
                 <div>
                   <h4 className="text-sm font-semibold text-white">{product.name}</h4>
                   <p className="text-xs text-gray-400 capitalize mt-0.5">
-                    {product.category.replace('-', ' ')}
+                    {(product.categoryId || product.category || '').replace(/-/g, ' ')}
                   </p>
                 </div>
               </div>
 
-              {/* Status Badge & Action */}
               <div className="flex items-center gap-4">
                 <span className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-emerald-950/80 text-emerald-400 border border-emerald-800/50">
                   {product.status || 'PUBLISHED'}

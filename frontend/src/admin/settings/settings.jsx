@@ -15,8 +15,7 @@ export default function Settings() {
   const [savingPass, setSavingPass] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Helper untuk mengambil token
-  const getToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
+  const getToken = () => localStorage.getItem('token') || sessionStorage.getItem('token') || '';
 
   // Fetch data profil user saat komponen dimuat
   useEffect(() => {
@@ -72,7 +71,7 @@ export default function Settings() {
       const data = await res.json();
 
       if (res.ok) {
-        setProfileMsg({ type: 'ok', text: 'Profile updated successfully.' });
+        setProfileMsg({ type: 'ok', text: data.message || 'Profile updated successfully.' });
       } else {
         setProfileMsg({ type: 'err', text: data.message || 'Failed to update profile.' });
       }
@@ -119,7 +118,7 @@ export default function Settings() {
       const data = await res.json();
 
       if (res.ok) {
-        setPassMsg({ type: 'ok', text: 'Password changed successfully.' });
+        setPassMsg({ type: 'ok', text: data.message || 'Password changed successfully.' });
         setCurrentPass('');
         setNewPass('');
         setConfirmPass('');
@@ -147,7 +146,7 @@ export default function Settings() {
     <div className="max-w-xl space-y-5">
       {/* Profile */}
       <div className="bg-gray-900 rounded-2xl border border-gray-800 p-6">
-        <h2 className="font-display font-700 text-base text-white mb-5">Profile</h2>
+        <h2 className="font-display font-bold text-base text-white mb-5">Profile</h2>
         {profileMsg && (
           <div
             className={`mb-4 px-4 py-3 rounded-xl text-sm border ${
@@ -202,7 +201,7 @@ export default function Settings() {
 
       {/* Password */}
       <div className="bg-gray-900 rounded-2xl border border-gray-800 p-6">
-        <h2 className="font-display font-700 text-base text-white mb-5">Change Password</h2>
+        <h2 className="font-display font-bold text-base text-white mb-5">Change Password</h2>
         {passMsg && (
           <div
             className={`mb-4 px-4 py-3 rounded-xl text-sm border ${
@@ -215,6 +214,17 @@ export default function Settings() {
           </div>
         )}
         <form onSubmit={handlePasswordChange} className="space-y-4">
+          <div>
+            <label className={labelCls}>Current Password</label>
+            <input
+              type="password"
+              className={inputCls}
+              value={currentPass}
+              onChange={(e) => setCurrentPass(e.target.value)}
+              placeholder="Enter current password"
+              autoComplete="current-password"
+            />
+          </div>
           <div>
             <label className={labelCls}>New Password</label>
             <input
@@ -252,7 +262,7 @@ export default function Settings() {
 
       {/* Info */}
       <div className="bg-gray-900 rounded-2xl border border-gray-800 p-5">
-        <h2 className="font-display font-700 text-sm text-white mb-3">System Connection</h2>
+        <h2 className="font-display font-bold text-sm text-white mb-3">System Connection</h2>
         <p className="text-xs text-gray-500 leading-relaxed">
           This admin panel is connected to the REST API backend (<strong className="text-gray-400">Node.js / Express</strong>).
           Profile updates and password changes are securely persisted in the database.

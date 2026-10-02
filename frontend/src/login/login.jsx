@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { login, isAuthenticated, seedDefaultAdmin } from "../utils/auth";
 
 export default function AdminLogin() {
@@ -34,12 +34,23 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-950 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-950 px-4 relative">
+      {/* Tombol Kembali ke Landing Page di sudut kiri atas */}
+      <Link
+        to="/"
+        className="absolute top-6 left-6 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors bg-gray-900/80 hover:bg-gray-900 border border-gray-800 px-4 py-2 rounded-xl backdrop-blur-sm"
+      >
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Kembali ke Beranda
+      </Link>
+
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex w-16 h-16 bg-white rounded-2xl items-center justify-center mb-4 shadow-lg p-2">
-            <img src="/logo-ref.png" alt="UKS" className="w-full h-full object-contain" />
+            <img src="/logo.png" alt="UKS" className="w-full h-full object-contain" />
           </div>
           <h1 className="font-display font-black text-2xl text-white">UD. Karmindo Supply</h1>
           <p className="text-gray-500 text-sm mt-1">Admin Panel</p>
@@ -116,9 +127,19 @@ export default function AdminLogin() {
             </button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-gray-800">
+          {/* Tombol sekunder di bawah Form Login */}
+          <div className="mt-4 text-center">
+            <Link
+              to="/"
+              className="text-xs text-gray-500 hover:text-gray-300 transition-colors inline-flex items-center gap-1"
+            >
+              ← Kembali ke Halaman Utama
+            </Link>
+          </div>
+
+          <div className="mt-5 pt-5 border-t border-gray-800">
             <p className="text-xs text-gray-600 text-center">
-              Default: <span className="text-gray-500">admin@uks.com</span> / <span className="text-gray-500">admin123</span>
+              Default: <span className="text-gray-500">admin@uks.com</span> / <span className="text-gray-500">password123</span>
             </p>
           </div>
         </div>

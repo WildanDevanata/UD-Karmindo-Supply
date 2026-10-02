@@ -33,73 +33,80 @@ export default function ProductForm() {
   const [imagePreview, setImagePreview] = useState('');
   const [uploading, setUploading] = useState(false);
 
-  // Fetch daftar kategori
+  // Fetch Kategori & Detail Produk (jika Edit Mode)
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await fetch(`${API_BASE_URL}/categories`);
-        const data = await res.json();
-        const catList = Array.isArray(data) ? data : [];
-        setCategories(catList);
+    let isMounted = true;
 
-        if (!isEdit && catList.length > 0) {
-          setForm((f) => ({ ...f, categoryId: catList[0].id }));
-        }
-      } catch (err) {
-        console.error('Error fetching categories:', err);
-      }
-    };
-
-    fetchCategories();
-  }, [isEdit]);
-
-  // Fetch detail produk jika mode Edit
-  useEffect(() => {
-    if (!isEdit || !id) {
-      setLoading(false);
-      return;
-    }
-
-    const fetchProduct = async () => {
+    const loadData = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`${API_BASE_URL}/products/${id}`);
-        if (res.ok) {
-          const product = await res.json();
-          const { id: _id, slug: _slug, createdAt: _c, updatedAt: _u, ...rest } = product;
-          
-          setForm({
-            ...EMPTY,
-            ...rest,
-            categoryId: rest.categoryId || '',
-          });
-          setSizesInput(Array.isArray(product.availableSizes) ? product.availableSizes.join(', ') : '');
-          setImagePreview(product.imageUrl || '');
+        setError('');
+
+        // 1. Fetch Categories
+        const catRes = await fetch(`${API_BASE_URL}/categories`);
+        const catData = await catRes.json();
+        const catList = Array.isArray(catData) ? catData : [];
+
+        if (!isMounted) return;
+        setCategories(catList);
+
+        // 2. Fetch Product jika Edit Mode
+        if (isEdit && id) {
+          const prodRes = await fetch(`${API_BASE_URL}/products/${id}`);
+          if (prodRes.ok) {
+            const product = await prodRes.json();
+            const { id: _id, slug: _slug, createdAt: _c, updatedAt: _u, ...rest } = product;
+
+            if (isMounted) {
+              setForm({
+                ...EMPTY,
+                ...rest,
+                categoryId: rest.categoryId || (catList.length > 0 ? catList[0].id : ''),
+              });
+              setSizesInput(
+                Array.isArray(product.availableSizes) ? product.availableSizes.join(', ') : ''
+              );
+              setImagePreview(product.imageUrl || '');
+            }
+          } else {
+            if (isMounted) setError('Produk tidak ditemukan.');
+          }
         } else {
-          setError('Product not found.');
+          // Mode Create New Product
+          if (isMounted && catList.length > 0) {
+            setForm((f) => ({ ...f, categoryId: catList[0].id }));
+          }
         }
       } catch (err) {
-        console.error('Error fetching product:', err);
-        setError('Failed to fetch product details.');
+        console.error('Error loading product data:', err);
+        if (isMounted) setError('Gagal memuat data dari server.');
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
-    fetchProduct();
+    loadData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [id, isEdit]);
 
   const set = (key, value) =>
     setForm((f) => ({ ...f, [key]: value }));
 
-  // Handle upload gambar ke Endpoint REST API
+  // Handle Upload Gambar
   const handleImageUpload = async (file) => {
+    if (!file) return;
+
     if (!file.type.startsWith('image/')) {
-      setError('Please select an image file.');
+      setError('Harap pilih file gambar yang valid.');
       return;
     }
-    setUploading(false);
+
     setUploading(true);
+    setError('');
+
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -111,28 +118,31 @@ export default function ProductForm() {
 
       if (res.ok) {
         const rec = await res.json();
-        set('imageUrl', rec.url);
-        setImagePreview(rec.url);
+        const uploadedUrl = rec.url || rec.path || '';
+        set('imageUrl', uploadedUrl);
+        setImagePreview(uploadedUrl);
       } else {
-        setError('Failed to upload image.');
+        const errRes = await res.json().catch(() => ({}));
+        setError(errRes.message || 'Gagal mengunggah gambar.');
       }
     } catch (err) {
       console.error('Error uploading image:', err);
-      setError('Error uploading image.');
+      setError('Terjadi kesalahan saat mengunggah gambar.');
     } finally {
       setUploading(false);
     }
   };
 
-  // Submit Handler
+  // Submit Handler (Create / Update)
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!form.name.trim()) {
-      setError('Product name is required.');
+      setError('Nama produk wajib diisi.');
       return;
     }
     if (!form.categoryId) {
-      setError('Please select a category.');
+      setError('Kategori produk wajib dipilih.');
       return;
     }
 
@@ -140,12 +150,18 @@ export default function ProductForm() {
     setSaving(true);
 
     try {
+      // Parse ukuran dari string (dipisahkan koma) menjadi Array
       const sizes = sizesInput
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean);
 
-      const payload = { ...form, availableSizes: sizes };
+      const payload = {
+        ...form,
+        availableSizes: sizes,
+        sortOrder: Number(form.sortOrder) || 0,
+      };
+
       const url = isEdit ? `${API_BASE_URL}/products/${id}` : `${API_BASE_URL}/products`;
       const method = isEdit ? 'PUT' : 'POST';
 
@@ -159,11 +175,11 @@ export default function ProductForm() {
         navigate('/admin/products');
       } else {
         const errData = await res.json().catch(() => ({}));
-        setError(errData.message || 'Failed to save product.');
+        setError(errData.message || 'Gagal menyimpan data produk.');
       }
     } catch (err) {
       console.error('Error saving product:', err);
-      setError('Error saving product.');
+      setError('Terjadi kesalahan saat menyimpan produk.');
     } finally {
       setSaving(false);
     }
@@ -186,6 +202,7 @@ export default function ProductForm() {
     <div className="max-w-3xl space-y-5">
       {/* Back Button */}
       <button
+        type="button"
         onClick={() => navigate('/admin/products')}
         className="flex items-center gap-2 text-xs font-semibold text-gray-400 hover:text-white transition-colors"
       >
@@ -365,7 +382,7 @@ export default function ProductForm() {
                 type="number"
                 className={inputCls}
                 value={form.sortOrder}
-                onChange={(e) => set('sortOrder', parseInt(e.target.value) || 0)}
+                onChange={(e) => set('sortOrder', parseInt(e.target.value, 10) || 0)}
                 min={0}
               />
             </div>
@@ -383,7 +400,7 @@ export default function ProductForm() {
           </button>
           <button
             type="submit"
-            disabled={saving}
+            disabled={saving || uploading}
             className="px-8 py-2.5 rounded-xl text-xs font-semibold text-white transition-colors hover:opacity-90 shadow-md disabled:opacity-50"
             style={{ background: '#FF2027' }}
           >
