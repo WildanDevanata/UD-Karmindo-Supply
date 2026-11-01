@@ -20,7 +20,7 @@ function useReveal() {
 }
 
 // ─── Navbar ───────────────────────────────────────────────────────────────────
-function Navbar({ onNav }) {
+function Navbar({ onNav, categories }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -32,17 +32,13 @@ function Navbar({ onNav }) {
 
   const navItems = [
     { label: 'HOME', id: 'home' },
-    { label: 'ABOUT US', id: 'about' },
     { label: 'PRODUCTS', id: 'products' },
+    { label: 'ABOUT US', id: 'about' },
   ];
-  const productItems = [
-    { label: 'COOKING OIL', id: 'cooking-oil' },
-    { label: 'COFFEE', id: 'coffee' },
-    { label: 'POULTRY MEAT', id: 'poultry-meat' },
-    { label: 'FROZEN FOOD', id: 'frozen-food' },
-    { label: 'VANILLA', id: 'vanilla' },
-    { label: 'PALM SUGAR', id: 'palm-sugar' },
-  ];
+  const productItems = categories.map(cat => ({
+    label: cat.name.toUpperCase(),
+    id: cat.id,
+  }));
 
   const handleNav = (id) => {
     onNav(id);
@@ -62,7 +58,7 @@ function Navbar({ onNav }) {
             </div>
             <div className="text-white text-left">
               <div className="font-display font-800 text-base leading-tight tracking-tight">UD. Karmindo Supply</div>
-              <div className="text-[10px] text-red-100 leading-tight tracking-wide">Global Food Supplier</div>
+              <div className="text-[10px] text-red-100 leading-tight tracking-wide">Global Market</div>
             </div>
           </button>
 
@@ -130,7 +126,7 @@ function Hero({ onExplore, onContact }) {
             & Beverage Products
           </h1>
           <p className="text-white/70 text-lg leading-relaxed mb-8 max-w-lg">
-            Supplying quality Indonesian food and beverage products to local and global markets.
+            Supplying quality Indonesian food and beverage products to global markets.
           </p>
           <div className="flex flex-wrap gap-4">
             <button onClick={onExplore}
@@ -235,10 +231,6 @@ function About() {
                   <img src="https://images.unsplash.com/photo-1587593810167-a84920ea0781?w=400&h=300&fit=crop&auto=format" alt="Poultry" className="w-full h-full object-cover" loading="lazy" />
                 </div>
               </div>
-            </div>
-            <div className="absolute -bottom-4 -left-4 bg-white rounded-xl p-4 shadow-xl border border-gray-100">
-              <div className="font-display font-black text-3xl" style={{ color: '#FF2027' }}>15+</div>
-              <div className="text-xs text-gray-500 font-medium mt-0.5">Years of Experience</div>
             </div>
           </div>
         </div>
@@ -509,7 +501,7 @@ function ProductDetailModal({ product, allCategories, onClose }) {
 }
 
 // ─── Showcase Banner ──────────────────────────────────────────────────────────
-function ShowcaseBanner({ onExplore }) {
+function ShowcaseBanner({ onExplore, categories }) {
   const ref = useReveal();
   return (
     <section className="relative py-32 overflow-hidden">
@@ -519,9 +511,14 @@ function ShowcaseBanner({ onExplore }) {
       </div>
       <div ref={ref} className="reveal relative max-w-4xl mx-auto px-4 text-center text-white">
         <div className="flex justify-center gap-4 mb-8 flex-wrap">
-          {['Coffee', 'Cooking Oil', 'Frozen Food', 'Poultry', 'Vanilla', 'Palm Sugar'].map(label => (
-            <span key={label} className="text-xs font-bold px-3 py-1.5 rounded-full bg-white/15 border border-white/30 tracking-wide">{label}</span>
-          ))}
+        {categories.map(cat => (
+          <span
+            key={cat.id}
+            className="text-xs font-bold px-3 py-1.5 rounded-full bg-white/15 border border-white/30 tracking-wide"
+          >
+            {cat.name}
+          </span>
+        ))}
         </div>
         <h2 className="font-display font-black text-4xl lg:text-6xl leading-tight mb-6">Quality Indonesian Products<br />for Your Business</h2>
         <p className="text-white/75 text-lg mb-10 max-w-xl mx-auto">Trusted food and beverage distribution from Indonesia's finest natural resources.</p>
@@ -724,7 +721,7 @@ export default function PublicSite() {
 
   return (
     <div className="min-h-screen">
-      <Navbar onNav={handleNav} />
+      <Navbar onNav={handleNav} categories={categories} />
       <Hero onExplore={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })} onContact={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })} />
       <About />
       <WhyChooseUs />
@@ -736,7 +733,10 @@ export default function PublicSite() {
         error={error}
         onProductDetail={setActiveProduct}
       />
-      <ShowcaseBanner onExplore={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })} />
+      <ShowcaseBanner
+        categories={categories}
+        onExplore={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
+      />
       <Contact />
       <InquirySection />
       <Footer categories={categories} onNav={handleNav} />
