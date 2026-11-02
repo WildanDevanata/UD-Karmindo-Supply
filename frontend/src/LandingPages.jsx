@@ -238,45 +238,45 @@ function About() {
           </div>
           <div className="relative">
             <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-4">
-  <div className="rounded-2xl overflow-hidden h-48 bg-gray-50 border border-gray-200 shadow-md p-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-    <img
-      src={kopi2}
-      alt="Coffee products"
-      className="w-full h-full object-contain"
-      loading="lazy"
-    />
-  </div>
+              <div className="space-y-4">
+                <div className="rounded-2xl overflow-hidden h-48 bg-gray-50 border border-gray-200 shadow-md p-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                  <img
+                    src={kopi2}
+                    alt="Coffee products"
+                    className="w-full h-full object-contain"
+                    loading="lazy"
+                  />
+                </div>
 
-  <div className="rounded-2xl overflow-hidden h-36 bg-gray-50 border border-gray-200 shadow-md p-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-    <img
-      src={spices}
-      alt="Vanilla"
-      className="w-full h-full object-contain"
-      loading="lazy"
-    />
-  </div>
-</div>
+                <div className="rounded-2xl overflow-hidden h-36 bg-gray-50 border border-gray-200 shadow-md p-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                  <img
+                    src={spices}
+                    alt="Vanilla"
+                    className="w-full h-full object-contain"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
 
-<div className="space-y-4 pt-8">
-  <div className="rounded-2xl overflow-hidden h-36 bg-gray-50 border border-gray-200 shadow-md p-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-    <img
-      src={frozen}
-      alt="Cooking oil"
-      className="w-full h-full object-contain"
-      loading="lazy"
-    />
-  </div>
+              <div className="space-y-4 pt-8">
+                <div className="rounded-2xl overflow-hidden h-36 bg-gray-50 border border-gray-200 shadow-md p-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                  <img
+                    src={frozen}
+                    alt="Cooking oil"
+                    className="w-full h-full object-contain"
+                    loading="lazy"
+                  />
+                </div>
 
-  <div className="rounded-2xl overflow-hidden h-48 bg-gray-50 border border-gray-200 shadow-md p-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-    <img
-      src={frozen2}
-      alt="Poultry"
-      className="w-full h-full object-contain"
-      loading="lazy"
-    />
-  </div>
-</div>
+                <div className="rounded-2xl overflow-hidden h-48 bg-gray-50 border border-gray-200 shadow-md p-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                  <img
+                    src={frozen2}
+                    alt="Poultry"
+                    className="w-full h-full object-contain"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -339,36 +339,121 @@ function CategoryCard({ cat, onClick }) {
   );
 }
 
+
 // ─── Product Card ─────────────────────────────────────────────────────────────
 function ProductCard({ product, allCategories, onDetail, onInquire }) {
-  const catLabel = allCategories.find(c => c.id === product.category)?.name || product.category;
+  const catLabel =
+    allCategories.find(c => c.id === product.category)?.name ||
+    product.category;
+
+  const variants = Array.isArray(product.variants)
+    ? product.variants
+    : [];
+
+  const formatPrice = (variant) => {
+    const currency = variant.currency || 'USD';
+    const price = Number(variant.price);
+
+    if (!Number.isFinite(price)) return 'Price upon request';
+
+    const formattedPrice = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(price);
+
+    return `${currency} ${formattedPrice}${
+      variant.price_unit ? ` / ${variant.price_unit}` : ''
+    }`;
+  };
+
   return (
     <div className="product-card bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col">
-      <div className="relative h-48 overflow-hidden bg-gray-50">
-        <img src={product.image} alt={product.name} className="w-full h-full object-cover" loading="lazy" />
+
+      {/* Product Image */}
+      <div className="relative h-48 overflow-hidden bg-white flex items-center justify-center p-3">
+        <img
+          src={product.image}
+          alt={product.name}
+          className="w-full h-full object-contain"
+          loading="lazy"
+        />
+
         <div className="absolute top-3 left-3">
-          <span className="text-xs font-bold px-2 py-1 rounded-full text-white" style={{ background: '#FF2027' }}>{catLabel}</span>
+          <span
+            className="text-xs font-bold px-2 py-1 rounded-full text-white"
+            style={{ background: '#FF2027' }}
+          >
+            {catLabel}
+          </span>
         </div>
       </div>
+
+      {/* Product Information */}
       <div className="p-4 flex flex-col flex-1">
-        <h3 className="font-display font-700 text-base text-gray-900 mb-1 leading-snug">{product.name}</h3>
-        <p className="text-xs text-gray-500 leading-relaxed line-clamp-2 flex-1 mb-3">{product.description}</p>
-        {product.packaging && (
-          <div className="text-xs text-gray-400 mb-3">
-            <span className="font-semibold text-gray-600">Packaging:</span> {product.packaging}
+        <h3 className="font-display font-700 text-base text-gray-900 mb-1 leading-snug">
+          {product.name}
+        </h3>
+
+        <p className="text-xs text-gray-500 leading-relaxed line-clamp-2 flex-1 mb-3">
+          {product.description}
+        </p>
+
+        {/* Product Prices */}
+        <div className="mb-3">
+          <div className="text-xs font-semibold text-gray-600 mb-2">
+            Price:
           </div>
-        )}
-        <div className="flex gap-2">
-          <button onClick={onDetail}
+
+          {variants.length > 0 ? (
+            <div className="space-y-1.5">
+              {variants.slice(0, 2).map((variant, index) => (
+                <div
+                  key={variant.id || index}
+                  className="text-xs text-gray-500"
+                >
+                  <span className="font-medium text-gray-700">
+                    {variant.variant_name || variant.net_weight || `Variant ${index + 1}`}:
+                  </span>{' '}
+                  {formatPrice(variant)}
+                </div>
+              ))}
+
+              {variants.length > 2 && (
+                <div className="text-xs text-gray-400">
+                  +{variants.length - 2} more variants
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-xs text-gray-400">
+              Price upon request
+            </div>
+          )}
+        </div>
+
+        {/* Buttons */}
+        <div className="flex gap-2 mt-auto">
+          <button
+            onClick={onDetail}
             className="flex-1 py-2 text-xs font-bold tracking-wider rounded-lg border-2 transition-all hover:text-white"
             style={{ borderColor: '#FF2027', color: '#FF2027' }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#FF2027'; e.currentTarget.style.color = 'white'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#FF2027'; }}>
+            onMouseEnter={e => {
+              e.currentTarget.style.background = '#FF2027';
+              e.currentTarget.style.color = 'white';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = '#FF2027';
+            }}
+          >
             VIEW DETAIL
           </button>
-          <button onClick={onInquire}
+
+          <button
+            onClick={onInquire}
             className="px-4 py-2 text-xs font-bold tracking-wider rounded-lg text-white transition-all hover:opacity-80"
-            style={{ background: '#16a34a' }}>
+            style={{ background: '#16a34a' }}
+          >
             INQUIRE
           </button>
         </div>
@@ -483,63 +568,254 @@ function ProductCatalog({
   );
 }
 
-// ─── Product Detail Modal ─────────────────────────────────────────────────────
+
 function ProductDetailModal({ product, allCategories, onClose }) {
-  const catLabel = allCategories.find(c => c.id === product.category)?.name || product.category;
+  const catLabel =
+    allCategories.find(c => c.id === product.category)?.name ||
+    product.category;
+
+  const variants = Array.isArray(product.variants)
+    ? product.variants
+    : [];
+
+  const formatPrice = (variant) => {
+    const price = Number(variant.price);
+
+    if (!Number.isFinite(price)) return 'Price upon request';
+
+    const formattedPrice = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(price);
+
+    return `${variant.currency || 'USD'} ${formattedPrice}`;
+  };
+
   const inquire = () => {
-    const msg = `Hello UD. Karmindo Supply, I am interested in ${product.name}. I would like to get more information about this product.`;
-    window.open(`https://wa.me/6287858327220?text=${encodeURIComponent(msg)}`, '_blank');
+    const msg = `Hello UD. Karmindo Supply, I am interested in ${product.name}. I would like to inquire about the available variants and pricing.`;
+
+    window.open(
+      `https://wa.me/6287858327220?text=${encodeURIComponent(msg)}`,
+      '_blank'
+    );
   };
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
+
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, []);
 
+  const information = [
+    ['Origin', product.origin],
+    ['Packaging', product.packaging],
+    ['Certification', product.certification],
+    ['Specifications', product.specs],
+  ].filter(([label, value]) => value);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={onClose}>
-      <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-fade-in-up" onClick={e => e.stopPropagation()}>
-        <div className="relative h-64 bg-gray-100 rounded-t-3xl overflow-hidden">
-          <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-          <button onClick={onClose} className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-gray-600 hover:bg-white transition-colors shadow-md">✕</button>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Product Image */}
+        <div className="relative h-64 sm:h-72 bg-white rounded-t-3xl overflow-hidden flex items-center justify-center p-5">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-contain"
+          />
+
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-100 shadow-md"
+          >
+            ✕
+          </button>
+
           <div className="absolute top-4 left-4">
-            <span className="text-xs font-bold px-3 py-1.5 rounded-full text-white" style={{ background: '#FF2027' }}>{catLabel}</span>
+            <span
+              className="text-xs font-bold px-3 py-1.5 rounded-full text-white"
+              style={{ background: '#FF2027' }}
+            >
+              {catLabel}
+            </span>
           </div>
         </div>
-        <div className="p-6">
-          <h2 className="font-display font-black text-2xl text-gray-900 mb-2">{product.name}</h2>
-          <p className="text-gray-600 leading-relaxed mb-6">{product.description}</p>
-          <div className="grid sm:grid-cols-2 gap-4 mb-6">
-            {[
-              ['Origin', product.origin],
-              product.packaging ? ['Packaging', product.packaging] : null,
-              product.certification ? ['Certification', product.certification] : null,
-              product.specs ? ['Specifications', product.specs] : null,
-            ].filter(Boolean).map(([label, value]) => (
-              <div key={label} className="bg-gray-50 rounded-xl p-4">
-                <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{label}</div>
-                <div className="text-sm text-gray-700 font-medium">{value}</div>
-              </div>
-            ))}
+
+        <div className="p-6 sm:p-8">
+
+          {/* Product Overview */}
+          <div className="mb-7">
+            <div className="text-xs font-bold tracking-widest uppercase mb-2"
+              style={{ color: '#FF2027' }}>
+              Product Overview
+            </div>
+
+            <h2 className="font-display font-black text-2xl sm:text-3xl text-gray-900 mb-3">
+              {product.name}
+            </h2>
+
+            <p className="text-gray-600 leading-relaxed">
+              {product.description || 'No product description available.'}
+            </p>
           </div>
-          {product.sizes && product.sizes.length > 0 && (
-            <div className="mb-6">
-              <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Available Sizes</div>
-              <div className="flex flex-wrap gap-2">
-                {product.sizes.map(s => <span key={s} className="px-3 py-1.5 bg-gray-100 rounded-lg text-xs font-semibold text-gray-700">{s}</span>)}
+
+          {/* Product Variants & Pricing */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="text-xs font-bold tracking-widest uppercase"
+                  style={{ color: '#FF2027' }}>
+                  Product Details
+                </div>
+
+                <h3 className="font-display font-bold text-xl text-gray-900 mt-1">
+                  Available Variants & Pricing
+                </h3>
+              </div>
+
+              <span className="text-xs text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full">
+                {variants.length} Variants
+              </span>
+            </div>
+
+            {variants.length > 0 ? (
+              <div className="border border-gray-200 rounded-xl overflow-hidden">
+                {/* Table Header */}
+                <div className="hidden sm:grid grid-cols-5 gap-3 px-4 py-3 bg-gray-50 border-b border-gray-200">
+                  <div className="text-xs font-bold text-gray-500 uppercase">
+                    Variant
+                  </div>
+                  <div className="text-xs font-bold text-gray-500 uppercase">
+                    Net Weight
+                  </div>
+                  <div className="text-xs font-bold text-gray-500 uppercase">
+                    Quantity
+                  </div>
+                  <div className="text-xs font-bold text-gray-500 uppercase">
+                    Price
+                  </div>
+                  <div className="text-xs font-bold text-gray-500 uppercase">
+                    Price Unit
+                  </div>
+                </div>
+
+                {/* Variant Rows */}
+                {variants.map((variant, index) => (
+                  <div
+                    key={variant.id || index}
+                    className="grid grid-cols-2 sm:grid-cols-5 gap-3 p-4 border-b border-gray-100 last:border-b-0 hover:bg-red-50/40 transition-colors"
+                  >
+                    <div>
+                      <div className="sm:hidden text-[10px] font-bold text-gray-400 uppercase mb-1">
+                        Variant
+                      </div>
+                      <div className="text-sm font-bold text-gray-800">
+                        {variant.variant_name || `Variant ${index + 1}`}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="sm:hidden text-[10px] font-bold text-gray-400 uppercase mb-1">
+                        Net Weight
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {variant.net_weight || '-'}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="sm:hidden text-[10px] font-bold text-gray-400 uppercase mb-1">
+                        Quantity
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {variant.quantity || '-'}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="sm:hidden text-[10px] font-bold text-gray-400 uppercase mb-1">
+                        Price
+                      </div>
+                      <div className="text-sm font-bold"
+                        style={{ color: '#FF2027' }}>
+                        {formatPrice(variant)}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="sm:hidden text-[10px] font-bold text-gray-400 uppercase mb-1">
+                        Price Unit
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {variant.price_unit || '-'}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-center">
+                <p className="text-sm text-gray-500">
+                  Pricing and product variants are available upon request.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Additional Information */}
+          {information.length > 0 && (
+            <div className="mb-8">
+              <div className="text-xs font-bold tracking-widest uppercase mb-4"
+                style={{ color: '#FF2027' }}>
+                Additional Information
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-3">
+                {information.map(([label, value]) => (
+                  <div
+                    key={label}
+                    className="bg-gray-50 rounded-xl p-4 border border-gray-100"
+                  >
+                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                      {label}
+                    </div>
+
+                    <div className="text-sm text-gray-700 font-medium">
+                      {value}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
-          <button onClick={inquire}
-            className="w-full py-4 rounded-xl font-display font-800 text-sm tracking-widest text-white transition-all hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3"
-            style={{ background: 'linear-gradient(135deg, #FF2027, #CC1A20)' }}>
+
+          {/* Inquiry Button */}
+          <button
+            onClick={inquire}
+            className="w-full py-4 rounded-xl font-display font-extrabold text-sm tracking-widest text-white transition-all hover:opacity-90 hover:scale-[1.01] flex items-center justify-center gap-3"
+            style={{
+              background: 'linear-gradient(135deg, #FF2027, #CC1A20)',
+            }}
+          >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-              <path d="M11.999 0C5.373 0 0 5.373 0 12c0 2.117.553 4.103 1.522 5.836L.053 23.5l5.8-1.521A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 11.999 0zm.001 21.818a9.8 9.8 0 01-5.002-1.369l-.359-.213-3.44.902.918-3.351-.234-.374A9.806 9.806 0 012.182 12c0-5.418 4.4-9.818 9.818-9.818 5.418 0 9.818 4.4 9.818 9.818 0 5.418-4.4 9.818-9.818 9.818z"/>
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.173-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+              <path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.553 4.103 1.522 5.836L.053 23.5l5.8-1.521A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.8 9.8 0 01-5.002-1.369l-.359-.213-3.44.902.918-3.351-.234-.374A9.806 9.806 0 012.182 12c0-5.418 4.4-9.818 9.818-9.818 5.418 0 9.818 4.4 9.818 9.818 0 5.418-4.4 9.818-9.818 9.818z" />
             </svg>
+
             INQUIRE ABOUT THIS PRODUCT
           </button>
-          <p className="text-center text-xs text-gray-400 mt-3">Price available upon request — varies by quantity & order terms</p>
+
+          <p className="text-center text-xs text-gray-400 mt-3">
+            Contact us for bulk orders, availability, and further information.
+          </p>
         </div>
       </div>
     </div>
