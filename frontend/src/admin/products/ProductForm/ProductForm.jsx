@@ -116,18 +116,32 @@ export default function ProductForm() {
         body: formData,
       });
 
-      if (res.ok) {
-        const rec = await res.json();
-        const uploadedUrl = rec.url || rec.path || '';
-        set('imageUrl', uploadedUrl);
-        setImagePreview(uploadedUrl);
-      } else {
-        const errRes = await res.json().catch(() => ({}));
-        setError(errRes.message || 'Gagal mengunggah gambar.');
+      const rec = await res.json();
+
+      if (!res.ok) {
+        throw new Error(rec.message || 'Gagal mengunggah gambar.');
       }
+
+      // Ambil URL gambar dari respons server
+      const uploadedUrl = rec.url;
+
+      if (!uploadedUrl) {
+        throw new Error('Server tidak mengembalikan URL gambar.');
+      }
+
+      // Update URL gambar pada form
+      setForm((f) => ({
+        ...f,
+        imageUrl: uploadedUrl,
+        image: uploadedUrl,
+      }));
+
+      // Update preview agar langsung menampilkan gambar baru
+      setImagePreview(uploadedUrl);
+
     } catch (err) {
       console.error('Error uploading image:', err);
-      setError('Terjadi kesalahan saat mengunggah gambar.');
+      setError(err.message || 'Terjadi kesalahan saat mengunggah gambar.');
     } finally {
       setUploading(false);
     }
@@ -156,11 +170,13 @@ export default function ProductForm() {
         .map((s) => s.trim())
         .filter(Boolean);
 
-      const payload = {
-        ...form,
-        availableSizes: sizes,
-        sortOrder: Number(form.sortOrder) || 0,
-      };
+        const payload = {
+          ...form,
+          imageUrl: form.imageUrl,
+          image: form.imageUrl,
+          availableSizes: sizes,
+          sortOrder: Number(form.sortOrder) || 0,
+        };
 
       const url = isEdit ? `${API_BASE_URL}/products/${id}` : `${API_BASE_URL}/products`;
       const method = isEdit ? 'PUT' : 'POST';
@@ -300,8 +316,15 @@ export default function ProductForm() {
                 className={inputCls + ' mb-3'}
                 value={form.imageUrl}
                 onChange={(e) => {
-                  set('imageUrl', e.target.value);
-                  setImagePreview(e.target.value);
+                  const value = e.target.value;
+                
+                  setForm((f) => ({
+                    ...f,
+                    imageUrl: value,
+                    image: value,
+                  }));
+                
+                  setImagePreview(value);
                 }}
                 placeholder="https://... or upload below"
               />
@@ -311,7 +334,12 @@ export default function ProductForm() {
                 accept="image/*"
                 className="hidden"
                 onChange={(e) => {
-                  if (e.target.files?.[0]) handleImageUpload(e.target.files[0]);
+                  if (e.target.files?.[0]) {
+                    handleImageUpload(e.target.files[0]);
+                  }
+
+                  // Reset agar file yang sama bisa dipilih ulang
+                  e.target.value = '';
                 }}
               />
               <button

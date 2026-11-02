@@ -49,7 +49,7 @@ export default function AdminLogin() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex w-16 h-16 bg-white rounded-2xl items-center justify-center mb-4 shadow-lg p-2">
+          <div className="inline-flex w-20 h-20 rounded-2xl items-center justify-center mb-4 shadow-lg p-2">
             <img src="/logo.png" alt="UKS" className="w-full h-full object-contain" />
           </div>
           <h1 className="font-display font-black text-2xl text-white">UD. Karmindo Supply</h1>

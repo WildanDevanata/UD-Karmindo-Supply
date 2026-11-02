@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
+import frozen from './assets/frozen.png';
+import frozen2 from './assets/frozen2.png';
+import kopi2 from './assets/kopi2.png';
+import spices from './assets/spices.png';
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
@@ -53,7 +57,7 @@ function Navbar({ onNav, categories }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           <button onClick={() => handleNav('home')} className="flex items-center gap-3 shrink-0">
-            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-md p-1">
+            <div className="w-15 h-15 rounded-lg flex items-center justify-center shadow-md p-1">
               <img src="/logo.png" alt="UKS Logo" className="w-full h-full object-contain" />
             </div>
             <div className="text-white text-left">
@@ -151,18 +155,37 @@ function Hero({ onExplore, onContact }) {
 
         <div className="relative hidden lg:block">
           <div className="relative w-full aspect-square max-w-lg mx-auto">
-            <div className="absolute top-0 right-0 w-64 h-64 rounded-2xl overflow-hidden border-2 border-white/10 shadow-2xl">
-              <img src="https://images.unsplash.com/photo-1552592074-ea7a91b851b3?w=400&h=400&fit=crop&auto=format" alt="Cooking oil" className="w-full h-full object-cover" />
-            </div>
-            <div className="absolute top-20 left-0 w-52 h-52 rounded-2xl overflow-hidden border-2 border-white/10 shadow-2xl">
-              <img src="https://images.unsplash.com/photo-1758221052634-33f352d1318b?w=400&h=400&fit=crop&auto=format" alt="Coffee" className="w-full h-full object-cover" />
-            </div>
-            <div className="absolute bottom-10 right-10 w-56 h-44 rounded-2xl overflow-hidden border-2 border-white/10 shadow-2xl">
-              <img src="https://images.unsplash.com/photo-1587593810167-a84920ea0781?w=400&h=400&fit=crop&auto=format" alt="Poultry" className="w-full h-full object-cover" />
-            </div>
-            <div className="absolute bottom-0 left-4 w-44 h-36 rounded-2xl overflow-hidden border-2 border-white/10 shadow-xl">
-              <img src="https://images.unsplash.com/photo-1592788174877-3f99727fd23d?w=400&h=400&fit=crop&auto=format" alt="Vanilla" className="w-full h-full object-cover" />
-            </div>
+          <div className="absolute top-0 right-0 w-64 h-64 rounded-2xl overflow-hidden border-2 border-white/10 shadow-2xl">
+            <img
+              src={frozen}
+              alt="Frozen Food"
+              className="w-full h-full object-cover"
+            />
+          </div>
+
+          <div className="absolute top-20 left-0 w-60 h-60 rounded-2xl overflow-hidden border-2 border-white/10 shadow-2xl">
+            <img
+              src={kopi2}
+              alt="Coffee"
+              className="w-full h-full object-contain"
+            />
+          </div>
+
+          <div className="absolute bottom-10 right-10 w-56 h-44 rounded-2xl overflow-hidden border-2 border-white/10 shadow-2xl">
+            <img
+              src={frozen2}
+              alt="Frozen Products"
+              className="w-full h-full object-contain"
+            />
+          </div>
+
+          <div className="absolute bottom-0 left-4 w-44 h-36 rounded-2xl overflow-hidden border-2 border-white/10 shadow-xl">
+            <img
+              src={spices}
+              alt="Spices"
+              className="w-full h-full object-cover"
+            />
+          </div>
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#FF2027] rounded-xl px-4 py-3 text-center shadow-xl z-10">
               <div className="font-display font-black text-2xl text-white">UKS</div>
               <div className="text-[10px] text-red-100 tracking-widest">SUPPLIER</div>
@@ -215,22 +238,45 @@ function About() {
           </div>
           <div className="relative">
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-4">
-                <div className="rounded-2xl overflow-hidden h-48 bg-gray-100">
-                  <img src="https://images.unsplash.com/photo-1643426879831-b20d0d9e0110?w=400&h=300&fit=crop&auto=format" alt="Coffee products" className="w-full h-full object-cover" loading="lazy" />
-                </div>
-                <div className="rounded-2xl overflow-hidden h-36 bg-gray-100">
-                  <img src="https://images.unsplash.com/photo-1592788174877-3f99727fd23d?w=400&h=280&fit=crop&auto=format" alt="Vanilla" className="w-full h-full object-cover" loading="lazy" />
-                </div>
-              </div>
-              <div className="space-y-4 pt-8">
-                <div className="rounded-2xl overflow-hidden h-36 bg-gray-100">
-                  <img src="https://images.unsplash.com/photo-1552592074-ea7a91b851b3?w=400&h=280&fit=crop&auto=format" alt="Cooking oil" className="w-full h-full object-cover" loading="lazy" />
-                </div>
-                <div className="rounded-2xl overflow-hidden h-48 bg-gray-100">
-                  <img src="https://images.unsplash.com/photo-1587593810167-a84920ea0781?w=400&h=300&fit=crop&auto=format" alt="Poultry" className="w-full h-full object-cover" loading="lazy" />
-                </div>
-              </div>
+            <div className="space-y-4">
+  <div className="rounded-2xl overflow-hidden h-48 bg-gray-50 border border-gray-200 shadow-md p-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+    <img
+      src={kopi2}
+      alt="Coffee products"
+      className="w-full h-full object-contain"
+      loading="lazy"
+    />
+  </div>
+
+  <div className="rounded-2xl overflow-hidden h-36 bg-gray-50 border border-gray-200 shadow-md p-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+    <img
+      src={spices}
+      alt="Vanilla"
+      className="w-full h-full object-contain"
+      loading="lazy"
+    />
+  </div>
+</div>
+
+<div className="space-y-4 pt-8">
+  <div className="rounded-2xl overflow-hidden h-36 bg-gray-50 border border-gray-200 shadow-md p-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+    <img
+      src={frozen}
+      alt="Cooking oil"
+      className="w-full h-full object-contain"
+      loading="lazy"
+    />
+  </div>
+
+  <div className="rounded-2xl overflow-hidden h-48 bg-gray-50 border border-gray-200 shadow-md p-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+    <img
+      src={frozen2}
+      alt="Poultry"
+      className="w-full h-full object-contain"
+      loading="lazy"
+    />
+  </div>
+</div>
             </div>
           </div>
         </div>

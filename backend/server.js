@@ -239,7 +239,11 @@ app.put('/api/products/:id', async (req, res) => {
   const { id } = req.params;
   const body = req.body;
   const categoryId = body.category || body.categoryId;
-  const finalImage = body.image || body.imageUrl || '';
+  const finalImage =
+  body.imageUrl ||
+  body.image_url ||
+  body.image ||
+  '';
   const sizes = JSON.stringify(Array.isArray(body.sizes) ? body.sizes : (body.availableSizes || []));
 
   try {
